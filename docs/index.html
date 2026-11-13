@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pay-per-call tools for agents: what an x402 endpoint actually is</title>
+<meta name="description" content="How x402 pay-per-call endpoints work with MCP: the 402 challenge, accepts/payTo, USDC settlement, what a client must implement, and where the model breaks.">
+<link rel="canonical" href="https://doteyeso-ops.github.io/x402-mcp-pay-per-call/">
+<style>
+ body{margin:0;background:#f2ece0;color:#191610;font:17px/1.62 Georgia,'Iowan Old Style',serif}
+ .sheet{max-width:760px;margin:0 auto;padding:56px 28px 90px}
+ .k{font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;text-transform:uppercase;color:#8a7f6a}
+ h1{font-size:44px;line-height:1.06;letter-spacing:-.02em;font-weight:500;margin:14px 0 0}
+ .lede{font-size:20px;color:#4b4437;margin:18px 0 0}
+ h2{font-size:22px;margin:46px 0 10px;font-weight:500}
+ .f{border-top:1px solid #c9bda4;padding:14px 0}
+ .f span{font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;text-transform:uppercase;color:#8a7f6a}
+ .f p{margin:6px 0 0}
+ ol{padding-left:22px} li{margin:10px 0}
+ details{border-top:1px solid #c9bda4;padding:12px 0} summary{cursor:pointer}
+ .cta{border:1px solid #191610;padding:18px 20px;margin:38px 0 0;background:#fbf7ec}
+ .cta a{color:#a2311a}
+ footer{margin-top:54px;font:12px/1.5 ui-monospace,Menlo,monospace;color:#6f6656}
+</style></head><body><div class="sheet">
+<div class="k">x402 + MCP</div>
+<h1>Pay-per-call tools for agents: what an x402 endpoint actually is</h1>
+<p class="lede">A 402 with a price and an address. No signup, no API key, no invoice - and a client that knows what to do with it.</p>
+<p>An agent that needs a tool should not have to negotiate an account. x402 makes the price part of the HTTP exchange: you ask for the resource, the server answers 402 with what it costs and where to pay, you pay, you retry, you get the data. The idea is elegant and the hard part is everything around it - discovery, price sanity, and whether the agent's owner ever sees the bill.</p>
+<h2>The numbers that decide it</h2><div class='f'><span>402 is the contract</span><p>A bare call returns 402 with a body naming the price, the asset and the payTo address per chain. A client that cannot parse that body cannot use the endpoint, however good the data is.</p></div><div class='f'><span>Settlement is on-chain, not in the response</span><p>The 402 tells you where to pay; the proof of payment is a transaction. Any endpoint that unlocks on a header alone without verifying settlement is giving the data away.</p></div><div class='f'><span>Price granularity is the product decision</span><p>A cent per call is invisible; a dollar per call needs a human. Endpoints that price near zero get called by loops, not customers - which is why on-chain volume is a poor proxy for revenue.</p></div><div class='f'><span>MCP is the discovery layer</span><p>An MCP server advertises tools an agent can call; x402 prices them. Together they replace the API key, not the invoice.</p></div><div class='f'><span>Self-payment looks like traction</span><p>A treasury that funds test wallets which then call its own endpoints generates on-chain volume and zero revenue. Check the counterparty before calling anything a sale.</p></div>
+<h2>How to do it, in order</h2><ol><li><b>Make the challenge machine-readable.</b> Name the resource, the price, the asset and the chain. If a client has to scrape prose to find the address, it will not pay.</li><li><b>Verify settlement before serving.</b> Check the transaction, the amount, the asset and the destination. A 200 without verification is a free endpoint dressed as a paid one.</li><li><b>Price per call against a real cost.</b> If the unit price is below the cost of verifying the payment, you have built a donation box.</li><li><b>Publish one working example.</b> A curl that returns 402 and a second curl that pays is worth more than any landing page.</li><li><b>Instrument the funnel.</b> Challenges served, payments attempted, payments settled, unique payers. The last one is the only number that means anything.</li></ol>
+<h2>Questions</h2><details><summary>Do agents actually pay for tools?</summary><p>Some do, in small amounts. Treat revenue as unproven until you can name a payer that is not your own wallet.</p></details><details><summary>Which is better, x402 or an API key?</summary><p>Keys suit humans with accounts; x402 suits agents with a wallet and no procurement. They are different customers, not competing designs.</p></details><details><summary>How do I test an endpoint without a wallet?</summary><p>Call it and read the 402. If the challenge names price, asset and destination correctly, the contract is working before any money moves.</p></details>
+<div class="cta"><p>Vibes-Coded exposes agent tools over x402 and MCP - search, page-to-markdown, JSON repair, shared memory - with a free tier and a working 402 challenge you can inspect before paying anything.</p>
+<p><b><a href="https://vibes-coded.com?utm_source=github&amp;utm_medium=repo&amp;utm_campaign=x402-mcp-pay-per-call">Vibes-Coded</a></b></p>
+<p class="k">Written by the person who runs Vibes-Coded. On-chain revenue to date is under a dollar, and this page says so rather than implying traction.</p></div>
+<footer>Vibes-Coded · agent tools over x402 · vibes-coded.com</footer>
+</div></body></html>
